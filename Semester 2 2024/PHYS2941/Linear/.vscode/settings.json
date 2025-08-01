@@ -1,0 +1,15 @@
+{
+    "java.project.sourcePaths": [
+        "src"
+    ],
+    "java.project.outputPath": "bin",
+    "java.project.referencedLibraries": {
+        "include": [
+            "lib\\engine.jar",
+            "c:\\Users\\samal\\OneDrive\\Semester 2 2024\\PHYS2941\\Linear\\lib\\engine.jar"
+        ],
+        "exclude": [
+            "c:\\Users\\samal\\Downloads\\jcommon-1.0.24.jar"
+        ]
+    }
+}

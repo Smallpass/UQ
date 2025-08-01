@@ -1,0 +1,1546 @@
+(Week 1)
+
+ssh sNNNNNNN@moss.labs.eait.uq.edu.au
+
+Add -A after ssh so that ssh commands that can modify the uq server dont ask for a password
+
+==============
+Vimtutor notes
+==============
+
+Up = k
+Down = j
+Left = h
+Right = l
+
+q! = Exit file without saving
+wq = Exit file saving changes
+
+i = To start typing at cursor
+A = To start typing at the end of line (append)
+
+dw = To delete from cursor to start of next word
+d$ = To delete from the cursor to end of the line
+dd = To delete whole line
+
+2w = To repeat a motion ----> ?
+  The format for a change command is:
+               operator   [number]   motion
+     where:
+       operator - is what to do, such as  d  for delete
+       [number] - is an optional count to repeat the motion
+       motion   - moves over the text to operate on, such as  w (word),
+                  $ (to the end of line), etc.
+
+
+0 = To move to the start of the line
+
+u = To undo previous action
+U = To undo all changes on a line
+Ctrl-R = To undo an undo
+
+P = To place a deleted line after the cursor
+r = To replace the chararcter under the cursor with the wanted one
+ce = To change all characters from the cursor to the end of the word
+c$ = To change all characters from the cursor to the end of the line
+  The format for change is:
+        c   [number]   motion
+
+Ctrl-G = Displays the cursors location in the file and the files status
+G = Moves to the end of file
+"number" G = Moves to the "number" line
+gg = Moves to the first line
+
+/ "phrase" = Searches forward for the "phrase"
+? "phrase" = Searches backwards for the "phrase"
+n = After such a search, n finds the next location in the same direction
+N = After such a search, N finds the next location in the opposite direction
+Ctrl-O = Takes you back to old positions
+Ctrl-I = Takes you to newer positions
+
+Typing  %  while the cursor is on a (,),[,],{, or } goes to its match
+
+To substitute new for the first old in a line type    :s/old/new
+To substitute new for all 'old's on a line type       :s/old/new/g
+To substitute phrases between two line #'s type       :#,#s/old/new/g
+To substitute all occurrences in the file type        :%s/old/new/g
+To ask for confirmation each time add 'c'             :%s/old/new/gc
+
+!"command" = Executes and external "command"
+      Some useful examples are:
+         (MS-DOS)         (Unix)
+          :!dir            :!ls            -  shows a directory listing.
+          :!del FILENAME   :!rm FILENAME   -  removes file FILENAME.
+
+w "filename" = Writes the current Vim file to disc under "filename"
+v "motion" :w "filename" = Writes the selected lines to the disc under "filename"
+
+o = Opens a line below the cursor and enters edit mode
+O = Opens a line above the cursor
+a = Inserts text after the cursor
+A = Inserts text after the line
+e = Moves cursor to end of word
+y = Copies text
+p = Pastes text
+R = Enters replace mode until esc stops it
+
+Typing ":set xxx" sets the option "xxx".  Some options are:
+        'ic' 'ignorecase'       ignore upper/lower case when searching
+        'is' 'incsearch'        show partial matches for a search phrase
+        'hls' 'hlsearch'        highlight all matching phrases
+     You can either use the long or the short option name.
+
+no = To switch an option off
+
+F1 or Help = Opens the help tab
+help "cmd" = Opens the help tab on given "cmd"
+Ctrl-W Ctrl-W = Swap to another window
+q = Closes help window
+Ctrl-D = When using a command, use Ctrl-D to see possible completions, then use "tab" to chose one
+"Create a vimrc startup script to keep your preferred settings" -----> ?
+
+========
+C Syntax
+========
+
+C source files end in .c and are case sensitive
+Output numbers:
+% is pretty much a typecast in java
+int: %d or %i
+unsigned int: %u
+%e f and g are for floats and are slightly different
+char: %c
+
+Compilation:
+We use gcc and then the file name to compile a program
+Linking a library to a compiled programs is done with -lm
+The compiled program can be given a name using -o "name"
+
+Expressions:
+
+In programming an expression is a fragment of code which can be “evaluated” to get a value.
+
+Types:
+In C, expressions (and variables) have explicit types
+int – integer
+unsigned int – unsigned (non-negative) integer
+char – character
+float – single precision floating point number
+double – double precision floating point number
+
+Variables must be declared before use (unlike Python), e.g.
+    int x;
+    int y = 5; // Can declare and initialise in one statement
+
+Arrays:
+
+Arrays can be initialised when declared and the size can be infered from the initialisation
+Strings are an array of characters with a null character to terminate them
+
+For Loops:
+
+For loops are pretty much identical to Java, however we also have a few cool loops
+for (; remain > 0;)
+for(;;) = Forever loop
+for (a; b; c) which is equivalent to:
+A;
+while (B) {
+    Body;
+    C;
+}
+
+Do While:
+do {
+    Body;
+} while (Test);
+
+This will execute the code at least once, unlike 
+while (Test) {
+    Body;
+}
+
+
+(Week 2)
+
+Do Linux tutorial!
+
+==================
+Parameters of Main
+==================
+
+int main(int argc, char** argv, char* argv[]){}
+int argc: the number of strings in the array itself
+char** argv or char* argv[]: the array itself
+argv[0] is the program being run
+
+Typecasting can be an issue, for example:
+(int) expr
+    (int) argv[i]
+        We notice that although it is an integer, we are typecasting the pointer to an integer (which is already is), not the string itself.
+
+total += (int) argv[i];
+strtol() converts a string with characters to a number using pointers (explained later)
+
+========
+Pointers
+========
+Allow indirection
+Are analagous to Python or Java references
+Have a bad reputation, will let you shoot yourself in the foot, yay
+
+A pointer is a value and is the memory address to some thing that is important. Just as your address is the location to your house.
+Pointers have a type dependent on the thing it is pointing to. For example int* points to an int and char* points to a char.
+
+int* var;
+Declares a variable var that contains a pointer to an integer. Short hand: will often refer to variables by the type they store.
+
+int *var is also equivalent syntax
+int value = *var dereferences the pointer, such that value is now the integer stored in the place located by the pointer.
+
+In order to get a valid pointer, we use malloc().
+Can be thought of as m-memory alloc-allocate:
+
+void *malloc(size_t size);
+Where size is how big the thing we are trying to store is, thus malloc will return a pointer that points to a big enough usable memory.
+p gives the value of the pointer.
+p* gives the thing pointed to
+malloc() doesnt care what type we want to store, just how much room we need.
+Use sizeof to find how much space a given things takes up.
+The return value from malloc should probably be cast.
+Memory aquired via malloc is called Dynamic memory
+
+A memory leaks occur when we redifine the value of a pointer to point at a new thing, such that we have lost the pointer to the old data.
+We cant get is back :(. She fiddles with my pointer till my memory leaks.
+
+void *calloc(size_t nmemb, size_t size); will return a pointer to a space for an array, where nmemb is the number of members and size is an array of the size of each member. It also clears the place to store.
+
+void *realloc(void *ptr, size_t size) will return a new pointer to grow a memory block.
+
+free(void *ptr); Release the memory in a pointer.
+
+Void *:
+void fn: a function fn with no return value.
+int fn(void): a function with no parameters (fin()).
+void* is a pointer without a type (generic pointer) - Think of it like it points to anything
+Do not dereference a void*, it must by cast to a type first.
+
+As often times, after a method is run, the pointer will be lost as it was inside the method.
+The two cenarios are:
+We want to keep the pointer:
+    return the pointer, or potentially set it to some global variable or something idk. Side note, this is a really bad idea as the information in it can change and cause issues.
+We should clean up the pointer before exiting the method:
+    Use free(p)
+
+This makes the following dangerous:
+p3 = p2;
+free(p2);
+// use p3;
+As free() makes all pointers to that address invalid, it is no longer usable.
+
+==============
+Dynamic Arrays
+==============
+For a 10 element array, we reserve a place in memory for it using:
+int* arr = (int*)malloc(sizeof(int)*10);
+...
+// arr[0] to arr[9] is valid
+// we can place any integer in arr[i]
+...
+free(arr);
+
+Negative indecies just go backwards from the first term in the array. Not really valid and could affect important memory.
+
+Pointer array equivalence or someting:
+To look at first term in array:
+we use p
+for second:
+we use p+1 
+and so on
+
+For example:
+arr[0] and arr* will return the same thing, the first entry in the array
+Another:
+arr[4] and *(arr + 4) are the same.
+
+============
+NULL Pointer
+============
+
+The null pointer is special, it never points to anything. All pointers should be initialised to null (0) first unless there is a proper value to be given:
+arr* v = 0;
+<stddef.h> defines the macro as NULL - Use it! ------> Not exactly sure what this means.
+
+=======
+Structs
+=======
+
+A struc is a way to group together variables. 
+To declare a struct use:
+struct Data {
+    int length;
+    char* str;
+}; 
+
+struct Data d1;
+
+d1.length = 4;
+*d1.length is invalid as the . takes precidence, such that it is *(d1.length)
+(*d1).length = 4; legal but a little strange
+d1->length = 4; easier to read
+
+This can also form the basis for a linked list, such that:
+struct Node {
+    int value;
+    struct Node* next;
+}
+Could mean that multiple strucures point to another structure of the same type and repeating, potentially ending at a null pointer.S
+
+Some pointer related functions:
+
+void *memset(void *s, int c, size_t n);
+Sets a chunk of members to a chosen value
+
+void *memcopy(void *dest, const void *src, size_t n);
+Copies bytes from one pointer to another
+Buffers must not overlap, use memmove() if they do, or might.
+
+& is address of, 
+
+When a variable is passed into a function, the value is passed (copied in) not the variable itself.
+For example:
+int x = 1;
+fn(x) {
+    x++;
+}
+will never change x
+When passing a pointer into a function, if the value pointed to is changed in the function, it will potentially change data outside the method.
+Although this can cause issues, it makes it possible for when we want a method to change the value in a pointer.
+
+=======
+Strings
+=======
+A string is an array of characters, however, it is best to think of them as stored in an array of characters. It is noteworthy that an array of characters is not always a string or well defined string.
+A well informed string ends in a terminator byte (0)
+A good example:
+char buffer[7];
+strcpy(buffer, "hello");
+
+buffer[0] = h
+buffer[4] = o
+buffer[5] = 0 ------> Terminator
+buffer[7] = could be anything, whatever was last stored there.
+
+Strings dont store their length, it must be calculated each time, or stored earlier.
+
+Thus count until reaching null terminator:
+strlen(s); ---> RETURNS STRING LENGTH
+
+String type is most commonly given as char* -> Is the pointer to the first index in the string array
+Cool thing to use, greet = &string[2];
+strcat() ---> Does something idk.
+
+==============
+SVN operations
+==============
+
+svn add filename
+    tells svn to track changes to this file
+
+svn mv oldname newname
+    renames or moves a file
+    need to commit to make the change in repo
+
+svn rm filename
+    removes file locally and removes it from future repo revisions
+    cannot remove it from past versions
+
+svn status
+    Shews which files have pending changes
+    M - modified - commited
+    A - untracked file to be added - not yet commited
+    D - file to be removed - but not commited
+    ? - Dont know about file
+
+svn diff
+    Shows the lines which have been changed
+
+svn commit
+    Sends pending changes to the repo, must have an attached meaningful message about change
+    svn commit f1 f2 f3 (-m)
+
+svn log filename
+    shows the log messages for the file
+
+svn revert filename
+    Undo any pending changes to file
+    Cant be reversed
+
+svn update
+    Bring working copy up to date with the latest version in the repo
+    -r(revision number) will bring the file to given state
+
+cp filename backup
+    makes copy of that version of file
+
+========
+Makefile
+========
+
+Makefiles must have:
+a target: the file to be generated or the name of action carried out
+prerequisites or dependencies: files that must exist or actions carried out before building the target
+$@ = shorthand for target
+$< = shorthand for dependencies and prerequisites
+
+target: prerequisite ...
+    recipe
+    recipe
+    ...
+
+(Week 3)
+
+========================
+Multi dimensional arrays
+========================
+There are three options:
+1. int arr[M][N]; -> 2D array, size fixed at compile time
+2. int* arr = malloc(sizeof(int)*M*N); -> Fake it with a 1D array
+3. int** arr = malloc(sizeof(int*)*M); -> array of arrays
+
+2) 
+int* arr = malloc(sizeof(int)*M*N);
+//lokup arr[i][j]
+arr[i*M+j]
+(Think of it as making an array big enough to fit arrays of arrays)
+
+3) 
+int** arr = malloc(sizeof(int*)*M);
+for (int i = 0; i < M) {
+    arr[i] = malloc(sizeof(int)*N);
+}
+//lookup arr[i][j]
+In order to free, free the stored pointers in the array first, then the pointer to the top level array.
+
+=====
+Files
+=====
+
+The type for Cstandard I/O is FILE* (Opaque type)
+Also known as a file handle, we get it by using fopen()
+fclose() the FILE* when finished with it
+stdio.h defines three FILE* variables:
+    stdin - reading
+    stdout - terminal output
+    stderr - terminal output
+
+One byte at a time (copyf.c)
+fgetc(FILE*) reads one byte at a time and returns the char it is on. - worth returning it as an int so that it can return any value
+At the end of file, fgetc(FILE*) returns EOF (-1)
+
+feof(FILE*) can also be used for end of file
+feof(FILE*) only returns true if it has tried to read the file but failed because it is the end
+
+NOTE ON COMMA SEPARATING 
+expr1, expr2:
+evaluate 1,
+throw away result,
+evaluate 2,
+ - Is useful if the first expression has a side effect, for example:
+ ++things, things > 2
+
+NO COMMA THING
+while((c=something) != EOF), evaluates c, not the expression
+
+==============
+Error checking
+==============
+
+fopen() returns the null pointer if it cant open file.
+It will set the errno variable to indicate what the problem was.
+
+fprintf(FILE*, const char*, format,...);
+fputc() - puts single char
+fputs() - puts string
+fwrite() - binary data (inc. zero/null character)
+
+fgetc() - gets single char
+fgets() - gets whole line
+fread() - read binary data
+
+fscanf(FILE*, char*) - allows us to scan for particular structures of characters in a document.
+
+sscanf(FILE*) - Much better to use, 
+
+Buffered output occurs when the output of reading a file is delayed and stored in memory until the file is closed or a new line is made. 
+We can use fflush(FILE*) to print it out of memory. However, buffering slows down most code.
+
+The biggest issue with not closing files is that you can run into limits, such that you can only open a certain number of files at a time.
+
+All FILE*s will be closed with main() or exit(). If the program terminates abnormally, then the file closes but without a flush.
+
+===================
+Proprocessor macros
+===================
+
+The preprocessor runs before the main compile and deals with # directives (#define).
+#directives can look like function calls, but are expanded by the preprocessor.
+Many side affects when dealing with ().
+
+(Beyond the scope of the course as to why we use macro shit idk)
+
+=======================
+Conditional compilation
+=======================
+#define BOB - tells processor that BOB is a thing but has no value yet.
+
+=====
+enums
+=====
+
+bool allows us to have a variable that stores true or false.
+enmus basically make a new type with our own values
+
+enum Day {
+    Sunday,
+    Monday,
+    ...
+}
+
+switch statement:
+(Just a simpler way of doing if, else if)
+switch (s) {
+    case setup:
+        ...
+        break;
+    case Connected:
+        ...
+        break;
+    default:
+        ...
+}
+
+default is just if nothing else is triggered. Watch out for missing break statements.
+
+break; can also be used in for loops, the effect is it just breaks to the end of innermost loop.
+continue; jumps to the next iteration of the inner loop (basically just used for if you dont want to do the next steps in some case)
+
+=====
+Types
+=====
+
+(Just talkes about the sizes of types)
+
+=================
+Function pointers
+=================
+
+In C, the name of a function (without ()) is treated as a function.
+The type of g is: int (*) (void)
+A function which takes two ints and returns and in looks like:
+int (*) (int,int)
+(*) is the hint that we have a function pointer
+int (*vname) (int, char)
+Is useful when we dont exactly know what function we want to use.
+Using typedefs makes this easier somehow ---> Need to see why
+
+=========
+Operators
+=========
+
+a+=b
+a*=b
+i++
+++i
+--i
+i--
+
+|| = or
+&& = and
+(Lazy evaluation - only does what it needs)
+
+(Week 4)
+
+============================
+Lots of stuff on compilation
+============================
+
+(Week 5)
+Abstract or somethig: Seperates processes into managable sections, dont want to constantly look as integer files, higher levels are nicer
+Process states:
+Running process - executed on cpu
+Read - Could run but isnt yet
+Blocked - Not running as they are waiting for something
+Stopped - Process has been suspended (ctrl-z)
+Ended - Finished or ended, may have become a zombie
+
+Every process has a unique process id ID (PID)
+pid_t getpid(void);
+To retrieve parent process from child:
+pid_t getppid(void);
+
+The family tree, 
+init (PID 1) is special, sometimes called systemd
+$ ps -e: Shows us all processes in the system
+$pstree: Shows the tree structure visually
+
+Creating new processes:
+fork() - asks the kernel to create a new child process
+Called from one process (the parent)
+Returns in two processes (two processes "remember" calling it)
+
+Parents fork() call returns the PID of the child or -1 if no child was created
+Childs fork() call returns 0
+Child shares the same everything - stderr - stdout - etc
+
+It must be noted that the order of child-parent processing is undefined:
+I.E could print
+
+child
+parent 
+or 
+parent 
+child
+
+Forking can happen more than once. Grandchilden!!!
+There is some interesting stuff going on with buffers, 
+This is to do with the buffer not being flushed. We can manually flush the system using:
+fflush(stdout); - Yes it is double f, fuck you for doubting me
+
+Types of buffering:
+stdout:
+line buffered when stdout is a terminal
+block buffered when redirected to anything else (file, pipe)
+
+stderr:
+Unbuffered - all characters written immediately
+
+The point is that a forked program can return different results based on where the output is.
+
+Buffers can be tweaked using setbuf() and setvbuf(). Or running the program stdbuf
+
+Fork Bomb!!!
+In the case where a program doesnt terminates but creates forks, we call it a fork bomb. Cant kill of the kids fast enough hehe.
+
+Unfortunately there is a limit to the number of processes in moss, 1024 or there abouts. Once limit is hit, fork() returns -1.
+
+Ways to end forkbomb:
+ - kill or pkill
+
+Fork bomb consequences:
+ - Sadly it doesnt slow down other moss users :(     )
+ - Program sometimes gets kicked out and programs are killed or they continue to run and you cant get back in lmao
+
+Ending a process. 
+exit() is the system call that ends the current process
+The parameters to exite is the "exit status"
+Any open output streams are flushed
+Exit hooks are executed
+ - int atexit() - useless function in this course
+
+Dont want to flush after exit? Use _exit()
+Program crashes - Nothing gets flushed and nothing happens
+
+Zombies:
+
+System needs to keep a record of what happened in a child process in case parent is interested:
+ - Did it exit normally (with what status)
+ - Or did in terminate
+
+How to get rid of zombie:
+Parent reaps the child - crazy term
+To reap from the parent, we use wait(pointer to integer)
+The return of wait() is the PID of the child
+Wait only wakes up if dead child is found
+
+The purpose is we no longer get a zombie process as it is instantly killed
+
+You cannot kill of a child manually, it must be killed by parent
+If parent is never ended, you may end up with a large number of zombies and chew up processes, thus we wait() them. 
+If the parent ends, a child may continue with a program even though the parent died, so we must make sure to reap them at possible parent closures.
+
+We call this an orphaned child being adopted by PID 1.
+
+The information returned by wait() needs to be decoded:
+
+WIFEXITED(status) - returns true if process exited normally
+    WEXITSTATUS(status) - The exit status of the process
+WIFSIGNALED(status) - returns true if the process terminated by a signal
+    - WTERMSIG(status) - returns the signal that caused the termination
+There is other things we can look at but not interested rn
+
+There is a wait() varient:
+ - wait() doesnt conduct the same order each time, process choses
+ waitpid() waits for a specific process to die
+
+Process Diagrams: Have to work out what is happening in the process - forks and shit. Process is represented as a horizontal line; deviance from it are forks
+
+Changing the program:
+A process can change which program is running:
+int excl(char* path, char* arg0, char* arg1 ...)
+The last thing in the list must be the null pointer
+
+Replaces the old process image with a new one
+    Everything old is gone, and replaced
+
+
+From exec1.c, ./exec1 ls doesnt work, to take the path variable into account ust execlp (this course always uses p)
+
+execvp(char* arg0, char** argv);
+The v stands for vector, this method is used when we could have any number of argv, arg0 is the path
+
+(Week 6 contact)
+=======
+Signals
+=======
+
+Signals are messages between processes, but they dont carry any data, just that the signal occurred.
+
+Kernel will send signals...
+    On its own initiative
+     - SIGSEGV
+     - SIGPIPE
+    
+    Because a process has asked it to
+     - shell kill built-in commant
+     - Standalone executable: \..\..\kill
+     - kill() system call
+    
+Best to think of kill() as a signal being sent, a handler then decided what kill() does.
+
+kill -l to look at all types of signals
+
+sigaction:
+int sigaction(int signum, const struct sigaction* act, struct sigaction ...)
+
+Important to us is *sa_handler in the struct
+#include <signal.h>
+This is pretty much the only time where we can use a global variable
+
+SA_RESTART: if a signal arrives while a system call is running, retart the sys call.
+
+signal (7)
+
+SIGCHLD is sent to the parent if a child is killed.
+    Doesnt tell what child died, but we can then use wait() to check
+
+It is important to note that killing the parent does not kill the childern as well,
+
+SIGWNCH: Adjusts the formatting of a window when it is changed.
+
+(Week 7)
+EVERYTHING IS A FILE!!!
+
+To be treated as a file, the kernel needs to know how to open, close, read, write (bytes only) and seek (move around the file). Sometimes even if it is running
+
+File descriptors are just integers. When you ask the kernel to open a file, it gives back a file-descriptor
+IT DOES NOT RETURN A POINTER LIKE FILE*, IT GIVES AN INT
+Each process has its own file-descriptors, some examples:
+0 - stdin
+1 - stdout
+2 - stderr
+
+Opening files:
+open(const char* FILE NAME, int flags) - opening for reading
+There is also a three argument version with an additional mode_t mode indicating the permissions of the file - used for writing 
+If we get a negative from open() we could not open, number will determine why
+
+open() takes numeric constants instead of strings like fopen(),
+
+read() call deals in fixed numbers of bytes:
+
+ssize_t read(int filedes, void* buf, size_t nbyte)
+filedes = file descriptor
+buf = buffer
+nbyte = size of buffer
+returns number of bytes read
+Must be noted that the null terminator must be added to the end of the buffer as read does not apply the null terminator
+
+Moving around:
+
+off_t lseek(int fd, off_t offset, int whence)
+fd = file-descriptor
+offset = number, whence = start position
+(fsee() - FILE*)
+Whence option:
+SEEK_SET = start at offset
+SEEK_CUR = current position
+SEEK_END = from end of f
+
+Any open files in the parent at time of fork() will also open children,
+they share point to the same file structure, so if parent reads one, child will skip as the offset was incremented, but this cannot be predicted.
+
+If you open the same file multiple times, (parent and child both open it) they will get their own files, thus they can read it all
+
+File descriptors and descriptions:
+descriptor is an integer, and each points to a file description.
+The description contains a reference counter, a position and then file info
+
+When we create a child, it makes its own descriptors table, and as such, the reference count in the descriptions is increased.
+A child can closes a file, the reference counter is decreased, when it hits 0, we know no processes are using the file
+
+exec()
+Memory of process is replaced, however the file descriptor table is reserved,, unless the O_CLOEXEC flag is on, then it closes on exec.
+
+If we want to supress the output, we can redirect the output to /dev/null or something
+
+
+Another important this is piping: relocating the output of one program to the stdin of another:
+
+This is piping: 
+Process A will write something into a 'pipe' and process B can read it. Turns out this pipe is the buffer!
+
+If no bytes are in the pipe - it just waits for input like it does for stdin
+
+Writing to pipe, if pipe is full, write wont return until there is more space, potentially process B is making space.
+
+If it is impossible to read or write you will get SIGPIPE.
+
+The process cannot tell:
+ - How full the pipe is
+ - Whether anything is in the pipe until it is read
+ - Cannot directly connect two pipes together
+
+The only time where process B can affect the file descriptor of A is if it is a child - parent relationship.
+We would need to create a pipe first, so if pipe() is called and then the process is forked, they are now connected.
+int pipe(int fd[2]);
+creates a pipe.
+What is useful wil this, is if one end closes their write end and the other the read, one can tell the other what to do,  cannot go both ways. (UNIDIRECTIONAL)
+This is the same thing as how a child shares the same file if it is called before the fork.
+Important to close of ends of pipe if they arent being used.
+
+Important to block/handle SIGPIPE
+Porcess A writes, then B reads
+
+(Week 7 contact)
+
+
+(Week 8)
+
+Threads:
+Threads are not allowed in assignment 3: but are good for 4
+Pipes are somewhat limited:
+unidirectional
+hard to debug
+higher overhead
+time consuming
+
+A thread is a worker in a process, so every process has at least one thread
+
+We usually only interact with threads via libraries, lightweight process
+
+If we wanted multiple threads in a library, we would want them to share information easily.
+They share processes and open files, variables, heap and code but not stack or cpu registors
+
+Even a fork contains completely seperate stuff, its just copied. Whereas a multiple thread exist in the same process which, they have their own register and stack but share the code, data and files.
+
+Threading is useful as it is a way around blocking input/output, such that if there is nothing available, sending one thread to sleep, the other threads can continue to work
+It also is better for performance
+
+For example
+
+Read A
+Read B
+Read C
+
+If there is no data for A, it will never even try reading from B or C.
+Same for writing if the pipe is full
+
+You could get around this error with event driven programing, only conduct something if and input or output is noticed in the buffer, but it can get time consuming.
+
+Instead we can use pthreads:
+
+pthreads is a library that gives a portable interface to teh OS.
+
+Threads have no parent child relationships which is nice
+Any thread can join (or wait on) another thread in the same process.
+Threads cant interact with threads in other processes
+Any thread calling exit() will end the whole process including other tasks.
+Can you fork() a thread? ---> We will talk soon
+Signal handlers? ----> Yes but signal could be sent to any thread so if one doesnt handle it is could break.
+
+Thread functions allow us to create a thread:
+
+void* foo(void*){
+    Do thread things
+    return (void*) result
+}
+
+pthread_create(pthread_t* threadID, const pthread_attr_t* attr, void* Function, void* arg)
+Function would be foo
+arg would be whatever the argument of foo is
+thread = pointer to thread id 
+attr = attributes
+
+Cannot predict which thread runs first, just like parent-children stuff.
+
+pthread_join(pthread_t* threadID, NULL);
+Method causes the function to wait for the threads to finish
+Errors still can occur just less often
+
+pthread_exit(); Doesnt kill the process but kills the threads.
+
+Passing values into threads:
+So far we have passed in strings, working with integers which are smaller we are more likely to encounter the race condition, where two parts of code want to access the same spot so our arguments are time dependent.
+
+We want each spot to have its own individual stuff, we must free the values, to ensure this.
+
+Could have just passed in an integer rather than the pointer, but this is dodgy coding practice. 
+
+If we wanted to pass in multiple parameters to foo, we could use a struct, that way the thread function can just pull out the members
+Thus we can conclude the safest thing is:
+For one parameter: malloc
+For multiple parameter: struct
+
+Whats a thread id?
+pthread_t: It is an opaque type, its an unsigned long but cant rely on it, its also hard for debugging.
+
+pthread_exit(VAL) can kill the thread and return some chose VAL.
+
+Zombie thread: A thread that has finished but not returned anything.
+A joinable thread that has terminated but not been join()'d
+pthread_join() is similar to wait() for zombie processes.
+
+pthread_detach(tid) tells the system we will never join on the specified thread so it is cleaned automatically upon exit
+Must be noted that signals can be sent to any thread, could kill stuff
+attributes are useless in this course.
+
+Killing threads:
+Safest option is to use a shared variable that the thread checks, best to have this as an argument of a struct that is passed into the thread function.
+
+pthread_t pthread_self(void) returns the thread id of current thread
+
+Volatility:
+For example:
+int result = 0;
+if (*a > 0){
+    result++;
+}if (*a > 0){
+    result++
+}if (*a > 0){
+    result++
+}
+return result;
+Seems like should either return 0 or 3, however, if another thread is changing *a as this process is run, we could find other results.
+
+Thus volatile keywork warns the compiler that the value of teh variable may change in ways and at times when the compiler wont predict. Tells it to look it up again
+
+Variables created in a thread function are localised to thread and cannot be changed by others.
+
+Thread safety:
+An operation is thread safe if multiple threads can have active calls to the function at the same time.
+Things to look for: a value can be modified by one thread while another is using it (for example ++).
+
+the man file usually says if a function is thread safe.
+It also notes some alternative methods that are thread safe (usually have an _r ending).
+
+What happens when we fork a multi threaded function:
+Only the thread that calls fork is cloned!!!
+
+(Week 8 Contact)
+
+Semaphores:
+value++ is not atomic, meaning in assembly it will have to do many more than just one thing.
+So even inside value++, a seemingly simple operation, another thread could change the stuff happening.
+
+This atomic stuff is crazy, we can fix it using a lock that makes use of semaphores.
+
+We actually need the hardware of a computer to help us, but we make use of libraries which do it for us.
+A semaphore is an opaque type which representts an integer value. It has two atomic methods:
+sem_wait() if the value is > 0 decrement it by 1.
+if the value ==0 stop the process until it goes back up
+
+sem_pose() increments the value by 1.
+
+This way, with multiple blocked threads, only one is unlocked at a time.
+
+But do all threads have a go? Nah, some get delt bad cards but beyond the scope of this course.
+
+sem_t* lock;
+
+We can initialise the lock for a thread using sem_init(). Then we call sem_wait() which allows us to wait for a specific lock.
+The program does take longer, but now it works properly.
+sem_destroy() finally cleans up.
+Also note that you must always pass pointers into the methods, not the values themselves.
+
+Semaphorees for mutual exclusion:
+set the value of sem_init() to 1 that way only one thread runs at a time.
+
+Using this method we reduce waiting time and stuff.
+
+We could also limit the number of threads running at any time using sem_init().
+Then once sem_post() is called, sem_wait() and a create section will allow another thread to start.
+It is important to note that semophores cannot be passed round, only the address can be moved.
+
+The cost of synchronisation:
+Performance loss, time consuming.
+
+sem_trywait()
+    either lock immediately or error
+sem_timedwait()
+    error if lock cant be aquired before timeout
+    this function takes an absolute time not a delta
+Mutexes and something or rather
+
+(Week 9)
+Protocols: System of rules about the correct way to act in a formal situation.
+    Correct way to exchange data.
+    How to say things, what to expect.
+
+Entities
+    An active element in each layer, can be soft or hard
+Peer entities
+    Some layer
+    Sometimes called peer processes
+
+Service (interface) - Operations available to a higher level entity
+Protocol - Rules for communication between peer entities
+
+Connection:
+Connection-oriented - Telephone system - service user
+Connectionaless - postal service - just specifies the address for the sent message
+
+Reliability
+    Service provider makes "best effort" attempt to communicate
+    Unreliable
+
+The Internet (capital I) is an internetwork: a connected set of networks
+
+It is based on the TCP/IP protocol family
+IP (Internet Protocol)
+    Provides basic addressing scheme and unreliable delivery capability of packets from host to host
+UDP (User datagram protocol)
+    Uses IP to provide unreliable datagram delivery from process to process
+TCP (Transmission control protocol)
+    Uses IP to provide reliable byte streams from process to process
+
+When we talk about the 5 layer "TCP/IP" stack or Internet protocol suite
+ - Appication layer: Web browsers
+ - Transport layer: TCPm UDP
+ - Network layer: IP
+ - Link layer (data-link layer): Single line in network
+ - Physical layer: Wire, ethernet, wifi
+
+Addresses at each layer:
+ - Application specific - URLS (HTTPS)
+ - Port numbers
+ - IP Address
+ - Medium access control
+
+IP Internet protocol
+Connectionless
+Unreliable
+IP datagrams
+    consist of:
+        Header
+            20 byte fixed part, 0 to 40 byte optional part
+        Body part (data or "text")
+    Maximum size:
+    Theoretically 216 − 1 bytes (65535 bytes)
+    In practice, limited by MTU (maximum transmission unit) on a network
+    MTU often 1500 bytes (based on maximum ethernet frame size of 1518 bytes)
+
+IP v4 addresses - 4 bytes written in decimal
+Some addresses have special meanings
+
+TCP - Transmission control protocol
+    Connection-oriented
+    Reliable
+    Byte-stream (not message stream)
+    Full-duplex (Bidirectional)
+    Point-to-point (not multicast or broadcast)
+    Each machine has a TCP transport entity
+
+    It is connection oriented, 
+        Connection must first be established
+        Not actually a physical circuit
+        Making connections requires messages to be sent and recieved
+        Closing a connection is polite
+
+    Transport addresses: "ports" = a 16 bit integer
+    Web -> 80
+    SSH -> 22
+    SSL -> 443
+    Ports below 1024 are restricten on unix type systems
+    High numbered ports are ephemeral (short-lived)
+
+Sender 
+    Accepts byte streams from local processes
+    Breaks data into pieces < 64k bytes
+    Sends each piece as IP datagram
+    Time-out and retransmit if no acknowledgement 
+
+Reciever
+    IP datagrams containing TCP data are passed to TCP entity for reconstruction
+    Acknowledge reciept
+    
+
+TCP protocol
+    Data + 20 byte header including:
+        Source and destination port numbers
+        Sequence number (for reordering)
+        Acknowledgements
+    Segments with zero data are valid
+    Segment size is limited by IP datagram size and network MTU
+
+UDP
+
+(Week 9 contact)
+NetCat is a server debugger
+nc -l -4 (port number - Pick random until allowed)
+
+Client steps:
+Find out address of machine/service you wish to connect to.
+Make a socket
+connect() to server
+Wrap socket descriptor for nicer IO
+    You should dup() the file descriptor before calling open. Use one for reading and one for writing
+Communicate with server
+
+
+(1) 
+getaddrinfo() - Can be used to check for error
+inet_ntoa(sai->sin_addr) - Turns address to ascii string
+Struct addrinfo
+    contains struct sockaddr*
+        contains a struct in_addr
+            contains in_addr_t which is an unsigned integer of some sort
+32-bit IP addresses are stored in an IP address struct:
+struct in_addr:
+    in_addr_t s_addr;
+
+IP addresses and port numbers are stored in network byte order - i.e big-endian
+
+Linux on x86 uses little-endian to store numbers and thus we need to convert
+
+htonl() – convert long int from host to network byte order
+htons() – convert short int from host to network byte order
+ntohl() – convert long int from network to host byte order
+ntohs() – convert short int from network to host byte order
+
+Functions that deal with string IP addresses:
+int inet_aton(const char* cp, struct in_addr* inp)
+Converts string (cp) to network-byte ordered IP address (inp)
+
+char* inet_ntoa(struct in_addr in)
+Converts network byte ordered address to string (returns pointer to statically allocated space - not thread safe)
+
+inet_ntop is like inet_ntoa but its thread safe
+    handles IPv6
+inet_pton is like inet_aton but handles IPv6
+
+Socket address structures
+struct sockaddr{
+    unsigned short sa_family; //protocol family
+    char sa_data[14]; //address data
+}
+
+Client sends request to server, server sends handles request with resources then sends responce to client,  client handles the responnse
+
+Find out the address of the machine/service you wish to connect to,
+create socket - socket()
+Connect to server at particular address/port - connect()
+Send and receive data - send(), write(), recv(), read()
+    Or, wrap socket as a FILE* for nicer IO
+        dup() before calling fdopen() and use one file for reading and one for writing
+Close connection - close()
+
+Typical server
+create socket - socket()
+Bind to address/port - bind()
+Specify willingness to accept connection - listen()
+Loop
+    Block waiting for a connection - accpet()
+        returns a new socket
+        Original socket continues to listen
+    Deal with request (possibly within a new thread/process)
+        Communicate with client - send(), write(), recv(), read()
+    Close connection - close()
+
+Concurrent servers:
+We want to hanle communication with more than one client at a time.
+Options
+    fork() - multiprocess
+    multi-threat
+    I/O multiplexing
+
+
+(Week 10)
+
+Multi-process:
+Server accepts connection - gets a socket (fd) for client communication.
+Creates child process to handle communication
+Issues:
+Parent must close client socket after fork
+Chilt must chose the listening socket after fork
+Parent must reap dead children
+
+Multi-threading
+Handles multiple connections concurrently
+Simple to code
+Easy to share data to threads
+Issues:
+Can be difficult to debug, 
+overlap in thread control
+
+I/O multiplexing
+Allows you to wait on multiple threads by passing a list of fds and the number of fds
+
+
+(Week 10 contact)
+
+IPv4 Addresses
+
+They are 32bits
+Seperated as 111.111.11.11
+The 111.111 is the network part
+and 11.11 is the host part
+For something that is inside a subnet:
+111.111.11.xx 
+Everything to the left of xx is the network for it.
+16bit for network means 16bits for host
+18bit network means only 14 for host
+    this means 2^14 on the host, however we cannot have all 0 or 1, thus 2^14 - 2
+
+Computers need to know what network they are on and what their host number is
+We can use:
+    CIDR^2 notation
+    Subnet mask
+
+CIDR^2:
+    The IP adress is made, with the host being all 0's, then a slash, and then the number
+    of bits in the network:
+        123.123.0.0 / 16
+        123.123.12.0 / 24
+The blocked IP:
+All host bits are 0. This would just be the network "code" (minimum host address)
+All host bits are 1. This is the broadcast address (maximum host address)
+
+Netmask (subnet mask):
+All 1's for network, all 0's for host. Tells us the divide between host and network
+
+IP is the protocol for connecting computers around the world
+IP addresses are just the identifiers
+
+Routing
+If a computer wants to send something to another computer, it needs to know if it is on the same
+network. If it is, it can directly send it, if not, it must send it through another computer.
+    MAC of destination or intermediary
+ARP = Address resolution protocol operates at layer 2 (direct sending between computers 
+on the same network)
+
+Layer 2 can be ethernet, it doesnt care about the IP, just the MAC such that it can send things between
+computers on different networks
+
+NAT = network address translation
+
+If I send data to public network, boarder control (R) changes my IP and port number, does its thing,
+then the data comes back and R retranslates the IP and port to send back to me.
+But obviously, it needs to remember the data, memory intensive
+
+(Week 11 contact)
+
+ICMP: Internet control message protocol 
+    Network layer protocol but based on IP.
+    Used for diagnostic and control information about IP delivery
+    Errors are returned to source IP
+
+ping
+    sends a message to a device,
+        ICMP message recieved
+
+    hopefully it sends back a copy
+
+    then it calculates the time taken
+
+    returns "time exceeded" error message if the packet has hopped too much
+
+DNS: Domain name system
+    Turns host/domain names into IP addresses (names->IP)
+
+We used to store domain name IP addresses in "hosts file" when not too many things connected
+to servers at one time. 
+For a given domain, uq.edu.au or such, each of them has two servers which understand how
+to map from domain to IP address
+
+Suppose you want to know source.eait.uq.edu.au
+A root server knows the NS fo .au
+.au knows .edu.au
+.edu.au knows uq.edu.au
+...
+source.eait.uq.edu.au is then known
+
+Servers can operate in two ways,
+iterate: ask a server, if it doesnt know it recommends another.
+or recursive: It iterates for you
+
+nslookup and dig are two useful utilities to do this
+
+(Week 12)
+==============
+Virtual memory
+==============
+
+Abstraction of memory
+    We dont want processes to manipulate memory of another that it shouldnt
+
+Sharing
+    For interprocess communication
+    Avoiding redundancy
+        Unmodified parts of fork()
+
+Optimisation
+    Only loading things that need to be loaded
+
+Varying overall allocation
+    Dont want to have to fix memory at start of runtime
+
+Exceeding physical memory
+    Want to store stuff idle somewhere
+
+There are two types of addreses:
+    virtual - used by cpu when running processes:
+        pointers in code
+        instruction fetches
+        also called logical addresses
+    physical - locations in physical ram:
+
+Hardware support to allow dynamic translation between them without the program needing to be aware of it
+Ideally the kernel doesnt have to be in volved often
+
+MMU: memory management unit
+sits in between the cup and the physical address : RAM and device
+
+In charge of transforming virtual addresses into physical addresses
+
+This is done through a page table
+virtual address space is divided into equal sized pieces called "pages"
+The physical address space is divided into "frames"
+
+pages and frames are the same size
+
+Size of page = size of page frame = 2^(num of bits in offset)
+
+pageNO -> map (using page table) -> frameNO
+
+Worth noting: Each process has its own page table
+              Also, in virtual memory, we add this to the table with labels 1,2,3... however, the physical memory location is held in the page table and therefor does not need to be sequential
+
+page# = VA/pageSize
+offset = VA mod pageSize
+We chop off the offset, it remains the same for virtual and physical address
+page#|offset -> PT(page#)|offset
+
+Implementation
+Page table entries (PTE) describe a single virtual page:
+    the physical frame number
+    Misc. status/settings bits, e.g permissions, pagestate
+
+32bit virtual address with 4kiB page size
+A single process page table would need 2^32/2^12 page table entries
+
+4 byte PTE means potentially 4MiB table per process
+
+Needing to lookup a frame in the page table means that each memory access from a program needs two memory accesses:
+    one into the page table
+    one for the actual memory access
+
+Reduce this burden using a TLB: translation lookaside buffer
+
+    hardware cche: page->frame mappings
+    associative memory
+    fast
+    hardware only goes to actual memory-based table
+
+Page faults
+    When there is no fram corresponding to a given page
+
+    The page is legal for that process:
+        hasnt been loaded in yet
+        it has been paged/swapped out to disk
+    
+    The page is not legal for that process:
+        dereferenced the null pointer (any segmentation fault)
+        writing to a read-only page
+        instruction fetch from a non-executable page
+
+Core idea: legal vs illegal decisions are made at the level of the pages, not the addresses
+if page 0, hardware will cause segfault
+
+Multi-level tables
+ - Look at this
+
+User space memory
+    32bit is not much but when 64 is availible it makes for enough room to introduce security.
+    ASLR: address space layout randomisation
+
+(Week 12 contact)
+
+Works through past papers: worth a watch
+
+
+(Week 13)
+
+Files - bytes recorded in a secondary storage (collection of bytes)
+
+Disk - Secondary storage - spinning magnetic storage - solid state drives used to store files
+
+File system
+    A file system is a datastructure which manages
+        file contents
+        information about files
+        free space
+            - file systems have a size
+            - files can be added
+            - files can be changed in size
+
+Data structures need to exist somewhere
+    on a disk
+    on another file system
+    mac ?
+
+FS vs OS
+How programs manipulate files may depend more on the file system than the OS:
+    the OS typically provides on main (default) filesystem
+    that filesystem is often hard to use on other OS
+Disk and filesystems are not nessasarily 1-to-1, sometimes a disk might hold two filesystems, or a filesystem that spans multiple disks
+
+Metadata
+    Files are more than their data contents
+    metadata is information about the data, not part of it
+    name - does the content change if the name does
+        is the name unique
+        case sensitive
+        case preserving
+
+    location/path
+    size
+    creation/update time stamp
+    type of content
+        infer from name
+        encode type with file - .txt etc
+        guess from contents
+    permissions
+        by role
+        access control lists (ACL) - by user
+    
+
+rwxrwxrwx
+|1||2||3|
+1 = user permissions
+2 = group permissions
+3 = others permissions
+
+We use chmod (change mode) to modify permissions
+u, g, o for user group and other. Then +permissions
+i.e
+u+r = add read to user
+o+x = add execute to other
+
+alternatively, to use chmod, break rwxrwxrwx into three bit numbers,
+i.e
+rw-rw---- = 660
+thus
+chmod 660
+
+r-xr-x--- = 550
+
+chmod 0 = no permissions
+For interpretable scripts (shell scripts) we also need r in order to execute
+Spinning disk storage (cheap, large capacitance, slow)
+Fragmentation:
+Sometimes a file can be stored in multple places in memory which makes it slow. (External)
+Internal - unused space inside allocated blocks
+
+Solid state drives (SSD)
+Large arays of non-volatile (NAND flash) memory
+Re-use legacy logic 
+wear-levelling
+
+Indexed storage:
+Most moder Unix-like file systems use this structure:
+We have a block of pointers
+Inode: index node - Some number of direct pointers which point to first few file blocks.
+Single indirect: Pointers to secondary 
+Double indirect: points to a bunch of single indirect
+file contents: The file contents are pointed to from the single directs and index nodes
+
+Can be slow:
+So we can use extents:
+Instead of pointing to a block, we can point to a group of blocks represented by 
+(start, length) pairs
+This is efficient for larger files
+
+Directory Trees:
+Typically the directories on a filesystem form a tree
+Cant have directories the point back up to the parent directory
+Directories are just a special file,
+DIR* opendir(const char* pathname);
+struct dirent* readdir(DIR* dp);
+void rewinddir(DIR* dp);
+int closedir(DIR* dp);
+Directories contain file references, not the files themselves
+
+Inside the struct, we have the inodes and stuff to allow use to point 
+to the files inside the directory
+
+Inodes vs Disk Blocks
+Theyre differenct structures within the file system
+    inodes are not stored in blocks,
+    you can run out of space for one but not the other
+
+Reference count: How many places point to the inode
+
+We can store null pointers as node pointers, such that they are just ignored
+if we have no reason to store them
+
+Hard linkes:
+If a file is hardlinkes, it creates a newname.c that has an inode identicle to the 
+linked file, such that the reference count is now two.
+
+ln A.c B.c
+diff A.c B.c will show no difference
+Changing the mode of one file, will change it for both,
+Removing one file, will not remove the second, but the reference will go to 0
+unlink
+
+Cannot create links between directories, but can create links between files
+in different directories (must be in same file system)
+
+ls -i wil show the i-numbers for each directory entry
+ls -l will show how many links there are to a file
+
+DIRECTORIES:
+The reference cound of a directory is equal to the 
+number of subdirectories is has
+
+Symbolic links:
+Symlinks point from one name to another, as opposed to name to file contents
+ln -s target newname
+if newname isnt specified it uses the same name as target
+
+has premissions lrwxrwxrwx, which doesnt mean it has all permissions, but that
+it has the same permissions as the target.
+It will not prevent the target being deleted, it just flashes the symlink dir
+
+Mounting:
+Allowing the system to interact with the contents of a file system, the FD must be mounted
+Normally, filesystems should be unmounted before being removed, i.e, eject in windows file stuff
+Ejecting ensures all background tasks are ended, buffers are flushed, and sync the disk.
+Unix mount command will list mounted file systems
+
+Mount points:
+Windows
+    Forms a forest of trees
+UNIX:
+    All the directories of all mounted FD form a single unified
+    tree rooted a '/'
+macOS:
+    Eh
+
+when types ls -ali
+(i-number) (file type)(permissions) (link count) (owner) (group) (Size) (modification time) (file/dir name) 
+
+
+
+Vim tutor
+

@@ -1,0 +1,478 @@
+// CSSE2310 - Week 9 - net1.c
+#include <netdb.h>
+#include <string.h>
+#include <stdio.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+int main(int argc, char** argv)
+{
+    if (argc < 3) {
+        fprintf(stderr, "Usage: %s host port\n", argv[0]);
+        return 2;
+    }
+    const char* host = argv[1];
+    const char* port = argv[2]; // can be a service name or port number
+
+    struct addrinfo* ai = NULL; // Will point to the answer to our addr query
+    struct addrinfo hints; // This holds hints about what we want
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_INET; // IPv4  for generic could use AF_UNSPEC
+    hints.ai_socktype = SOCK_STREAM; // We want TCP
+    int err;
+    if ((err = getaddrinfo(host, port, &hints, &ai))) {
+        freeaddrinfo(ai);
+        fprintf(stderr, "%s\n", gai_strerror(err));
+        return 1; // could not work out the address
+    }
+    // now let's try to get the IP address out
+    // See man getaddrinfo for the addrinfo struct
+    struct addrinfo* ai_cursor = ai;
+    while (ai_cursor) {
+        struct sockaddr* sa = ai_cursor->ai_addr;
+        // There is more than one type of socket address
+        // So cast to the one we _know_ was sent back
+        struct sockaddr_in* sai = (struct sockaddr_in*)sa;
+
+        char* dottedDecimal = inet_ntoa(sai->sin_addr);
+        uint32_t addr = ntohl(sai->sin_addr.s_addr);
+        int portnum = ntohs(sai->sin_port);
+        printf("Addr: %s (hex %08x), Port: %d\n", dottedDecimal, addr, portnum);
+
+        // Move on to next address in the list
+        ai_cursor = ai_cursor->ai_next;
+    }
+
+    freeaddrinfo(ai); // Be a good memory citizen and free it
+    return 0;
+}
+
+// CSSE2310 - net2.c - sample client
+#include <netdb.h>
+#include <string.h>
+#include <stdio.h>
+#include <unistd.h>
+
+int main(int argc, char** argv)
+{
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s port-number\n", argv[0]);
+        return 2;
+    }
+    const char* port = argv[1];
+    struct addrinfo* ai = 0;
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_INET; // IPv4
+    hints.ai_socktype = SOCK_STREAM;
+    int err;
+    if ((err = getaddrinfo("localhost", port, &hints, &ai))) {
+        freeaddrinfo(ai);
+        fprintf(stderr, "%s\n", gai_strerror(err));
+        return 1; // could not work out the address
+    }
+    // create socket. 0 == use default stream protocol (TCP)
+    int fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd < 0) {
+        perror("Creating socket");
+        return 2;
+    }
+    if (connect(fd, ai->ai_addr, sizeof(struct sockaddr))) {
+        perror("Connecting");
+        return 3;
+    }
+    }
+    // fd is now connected
+    // we want separate streams (which we can close independently)
+    int fd2 = dup(fd);
+    FILE* to = fdopen(fd, "w");
+    FILE* from = fdopen(fd2, "r");
+
+    fprintf(to, "Hello\n");
+    fflush(to); // probably not necessary since fclose() will flush
+    fclose(to);
+
+    char buffer[80];
+    fgets(buffer, 79, from);
+    fclose(from);
+    printf("%s", buffer);
+    return 0;
+}
+                
+// CSSE2310 - net3b.c - sample server - setting socket options
+#include <netdb.h>
+#include <string.h>
+#include <stdio.h>
+#include <unistd.h>
+
+int main(int argc, char** argv)
+{
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s port-number\n", argv[0]);
+        return 2;
+    }
+    char* port = argv[1];
+    struct addrinfo* ai = 0;
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_INET; // IPv4
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE; // Will allow us to bind the socket to all of
+                                 // our interfaces (addresses) but only if the
+                                 // first argument to getaddrinfo() is NULL)
+
+    int err;
+    if ((err = getaddrinfo(NULL, port, &hints, &ai))) {
+        freeaddrinfo(ai);
+        fprintf(stderr, "%s\n", gai_strerror(err));
+        return 1; // could not work out the address
+    }
+
+    // create a socket and bind it to an address/port
+    int serv = socket(AF_INET, SOCK_STREAM, 0); // 0 == default stream protocol
+
+    // allow rapid reuse of the requested port
+    int v = 1;
+    setsockopt(serv, SOL_SOCKET, SO_REUSEADDR, &v, sizeof(v));
+
+    if (bind(serv, ai->ai_addr, sizeof(struct sockaddr))) {
+        perror("Binding");
+        return 3;
+    }
+
+    if (listen(serv, 10)) { // allow up to 10 connection requests to queue
+        perror("Listen");
+        return 4;
+    }
+
+    int conn_fd;
+    char* msg = "Go away!\n";
+    while (conn_fd = accept(serv, 0, 0), conn_fd >= 0) {
+        FILE* stream = fdopen(conn_fd, "w");
+        fputs(msg, stream);
+        fflush(stream);
+        fclose(stream);
+    }
+    return 0;
+}
+
+
+// CSSE2310 - net3.c - sample server
+#include <netdb.h>
+#include <string.h>
+#include <stdio.h>
+#include <unistd.h>
+
+int main(int argc, char** argv)
+{
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s port-number\n", argv[0]);
+        return 2;
+    }
+    char* port = argv[1];
+    struct addrinfo* ai = 0;
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_INET; // IPv4
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE; // Will allow us to bind the socket to all of
+                                 // our interfaces (addresses) but only if the
+                                 // first argument to getaddrinfo() is NULL)
+
+    int err;
+    if ((err = getaddrinfo("localhost", port, &hints, &ai))) {
+        freeaddrinfo(ai);
+        fprintf(stderr, "%s\n", gai_strerror(err));
+        return 1; // could not work out the address
+    }
+
+    // create a socket and bind it to an address/port
+    int serv = socket(AF_INET, SOCK_STREAM, 0); // 0 == default stream protocol
+    if (bind(serv, ai->ai_addr, sizeof(struct sockaddr))) {
+        perror("Binding");
+        return 3;
+    }
+
+    if (listen(serv, 10)) { // allow up to 10 connection requests to queue
+        perror("Listen");
+        return 4;
+    }
+
+    int conn_fd;
+    char* msg = "Thanks for dropping by!\n";
+    while (conn_fd = accept(serv, 0, 0), conn_fd >= 0) {
+        FILE* stream = fdopen(conn_fd, "w");
+        fputs(msg, stream);
+        fflush(stream);
+        fclose(stream);
+    }
+    return 0;
+}
+
+// CSSE2310 - net4.c - server that listens on ephemeral port
+#include <netdb.h>
+#include <string.h>
+#include <stdio.h>
+#include <unistd.h>
+
+int main(int argc, char** argv)
+{
+
+    struct addrinfo* ai = 0;
+    struct addrinfo hints;
+
+    char* port;
+
+    // See if a portnum was specified, otherwise use zero (ephemeral)
+    if (argc < 2) {
+        port = "0";
+    } else {
+        port = argv[1];
+    }
+
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_INET; // IPv4
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE; // Will allow us to bind the socket to all of
+                                 // our interfaces (addresses) but only if the
+                                 // first argument to getaddrinfo() is NULL)
+
+    int err;
+    if ((err = getaddrinfo(NULL, port, &hints, &ai))) {
+        freeaddrinfo(ai);
+        fprintf(stderr, "Error: %s\n", gai_strerror(err));
+        return 1; // could not work out the address
+    }    // create a socket and bind it to ain address/port
+    int serv = socket(AF_INET, SOCK_STREAM, 0); // 0 == default stream protocol
+    if (bind(serv, ai->ai_addr, sizeof(struct sockaddr))) {
+        perror("Binding");
+        return 3;
+    }
+
+    // Which port did we get?
+    struct sockaddr_in ad;
+    memset(&ad, 0, sizeof(struct sockaddr_in));
+    socklen_t len = sizeof(struct sockaddr_in);
+    if (getsockname(serv, (struct sockaddr*)&ad, &len)) {
+        perror("sockname");
+        return 4;
+    }
+    printf("%u\n", ntohs(ad.sin_port));
+
+    if (listen(serv, 10)) { // allow up to 10 connection requests to queue
+        perror("Listen");
+        return 4;
+    }
+
+    int conn_fd;
+    char* msg = "Thanks for dropping by!\n";
+    // change 0, 0 on next line to get info about other end
+    while (conn_fd = accept(serv, 0, 0), conn_fd >= 0) {
+        FILE* stream = fdopen(conn_fd, "w");
+        fputs(msg, stream);
+        fflush(stream);
+        fclose(stream);
+    }
+    return 0;
+}
+
+
+/*
+** CSSE2310/CSSE7231 - Sample Server
+** Accept connections on a given port, read text from connection
+** turn it into upper case, send it back.
+** Multi-process and multi-threaded versions of this server will
+** be created in class.
+*/
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <ctype.h>
+#include <string.h>
+
+// Listens on given port. Returns listening socket (or exits on failure)
+int open_listen(const char* port)
+{
+    struct addrinfo* ai = 0;
+    struct addrinfo hints;
+
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_INET; // IPv4
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE; // listen on all IP addresses
+
+    int err;
+    if ((err = getaddrinfo(NULL, port, &hints, &ai))) {
+        freeaddrinfo(ai);
+        fprintf(stderr, "%s\n", gai_strerror(err));
+        exit(1); // Could not determine address
+    }
+
+    // Create a socket
+    int listenfd = socket(AF_INET, SOCK_STREAM, 0); // 0=default protocol (TCP)
+    if (listenfd < 0) {
+        perror("Error creating socket");
+        exit(1);
+    }
+
+    // Allow address (port number) to be reused immediately
+    int optVal = 1;
+    if (setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &optVal, sizeof(int))
+            < 0) {
+        perror("Error setting socket option");
+        exit(1);
+    }
+
+    // Bind socket to address
+    if (bind(listenfd, ai->ai_addr, sizeof(struct sockaddr)) < 0) {
+        perror("Binding");
+        exit(3);
+    }
+
+    // Indicate willingness to listen on socket - connections can now be queued
+    if (listen(listenfd, 10) < 0) { // Up to 10 connection requests can queue
+        // (Reality on moss is that this queue length parameter is ignored)
+        perror("Listen");
+        exit(4);
+    }
+
+    // Have listening socket - return it
+    return listenfd;
+}
+// Function to capitalise a string (in place)
+// Note - string is not null terminated - we need the length also.
+char* capitalise(char* buffer, int len)
+{
+    int i;
+
+    for (i = 0; i < len; i++) {
+        buffer[i] = (char)toupper((int)buffer[i]);
+    }
+    return buffer;
+}
+
+void process_connections(int fdServer)
+{
+    int fd;
+    struct sockaddr_in fromAddr;
+    socklen_t fromAddrSize;
+    char buffer[1024];
+    ssize_t numBytesRead;
+
+    // Repeatedly accept connections and process data (capitalise)
+    while (1) {
+        fromAddrSize = sizeof(struct sockaddr_in);
+        // Block, waiting for a new connection. (fromAddr will be populated
+        // with address of client)
+        fd = accept(fdServer, (struct sockaddr*)&fromAddr, &fromAddrSize);
+        if (fd < 0) {
+            perror("Error accepting connection");
+            exit(1);
+        }
+
+        // Turn our client address into a hostname and print out both
+        // the address and hostname as well as the port number
+        char hostname[NI_MAXHOST];
+        int error = getnameinfo((struct sockaddr*)&fromAddr, fromAddrSize,
+                hostname, NI_MAXHOST, NULL, 0, 0);
+        if (error) {
+            fprintf(stderr, "Error getting hostname: %s\n",
+                    gai_strerror(error));
+        } else {
+            printf("Accepted connection from %s (%s), port %d\n",
+                    inet_ntoa(fromAddr.sin_addr), hostname,
+                    ntohs(fromAddr.sin_port));
+        }
+
+        // Send a welcome message to our client
+        dprintf(fd, "Welcome\n");
+
+        // Repeatedly read data arriving from client - turn it to upper case -
+        // send it back to client
+        while ((numBytesRead = read(fd, buffer, 1024)) > 0) {
+            capitalise(buffer, numBytesRead);
+            write(fd, buffer, numBytesRead);
+        }
+        // error or EOF - client disconnected
+
+        if (numBytesRead < 0) {
+            perror("Error reading from socket");
+            exit(1);
+        }
+        // Print a message to server's stdout
+        printf("Done with client\n");
+        fflush(stdout);
+        close(fd);
+    }
+}
+int main(int argc, char* argv[])
+{
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s port-num\n", argv[0]);
+        exit(1);
+    }
+
+    int portnum = atoi(argv[1]);
+    if (portnum < 1024 || portnum > 65535) {
+        fprintf(stderr, "Invalid port number: %s\n", argv[1]);
+        exit(1);
+    }
+
+    const char* port = argv[1];
+    int fdServer = open_listen(port);
+    process_connections(fdServer);
+
+    return 0;
+}
+
+    } else if (!strncmp("move ", command, 5)) {
+        if (!clientturn) {
+            fprintf(stderr, "Command is not valid - it's not your turn\n");
+                        fflush(stderr);
+            return 1;
+        } else {
+            if (valid_move(command)) {
+                fprintf(writefile, command);
+                fflush(writefile);
+            } else {
+                return false;
+            }
+        }
+
+else if (!strncmp("move ", command, 5)) {
+    if (valid_move(command)) {
+        if (!clientturn) {
+           fprintf(stderr, "Command is not valid - it's not your turn\n");
+            fflush(stderr);
+            return 1;
+        } else {
+            fprintf(writefile, command);
+            fflush(writefile);
+        }
+    } else {
+        return false;
+    }
+}
+}
+
+
+gamestate* initialise_game_state(serverdata* data) {
+        char* whiteplayer = "human";
+        if (!strcmp(data->clients[data->numclients]->colour, "black")) {
+                whiteplayer = "computer";
+        };
+
+        gamestate state = {
+            .ongoing = false,
+            .whiteplayer = whiteplayer,
+            .fenboard = "",
+        };
+
+        return &state;
+}
